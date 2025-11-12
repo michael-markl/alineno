@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LineLiner: Add Line Numbers to PDFs in Your Browser</title>
+
+    <!-- SEO and Social Sharing -->
+    <meta name="description" content="LineLiner is a free, open-source tool to add line numbers to any PDF file. Everything happens locally in your browser for maximum privacy and speed. No upload required.">
+    <meta name="keywords" content="pdf line numbers, add line numbers to pdf, pdf tool, developer tool, legal document, academic paper, pdf annotation, browser tool, client-side, no-upload">
+    <meta property="og:title" content="LineLiner: Add Line Numbers to PDFs, 100% In-Browser">
+    <meta property="og:description" content="A free, client-side tool for adding line numbers to legal documents, academic papers, and other PDFs without ever uploading your files.">
+    <meta property="og:type" content="website">
+    <!-- <meta property="og:image" content="your-preview-image.png"> -->
+
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"
+        integrity="sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e"
+        crossorigin="anonymous"></script>
+    <script>
+        // Set the worker source for pdf.js securely with SRI hash
+        (async () => {
+            try {
+                const workerSrcUrl = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+                const integrity = 'sha384-SnzOobpRMLXZ52iJvZm/C0fYw0OQemTXzTjIsdsfMcrCtCEe9qgzxTd3RSklO5x2';
+
+                const response = await fetch(workerSrcUrl, { integrity });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch worker script: ${response.statusText}`);
+                }
+
+                const scriptBlob = await response.blob();
+                const objectUrl = URL.createObjectURL(scriptBlob);
+                pdfjsLib.GlobalWorkerOptions.workerSrc = objectUrl;
+                console.log('pdf.js worker set up successfully via Blob URL.');
+            } catch (error) {
+                console.error('Failed to set up pdf.js worker:', error);
+                // Optionally, provide feedback to the user that the PDF functionality might not work.
+            }
+        })();
+    </script>
+</head>
+
+<body>
+    <div class="main-layout">
+        <div class="left-column">
+            <div class="container">
+                <h1>LineLiner</h1>
+                <p>Add line numbers to any PDF. All processing happens locally in your browser. <strong>No upload takes place.</strong></p>
+                
+                <div id="drop-zone">
+                    <input type="file" id="pdf-input" accept="application/pdf" style="display: none;">
+                    <p>Drag & Drop a PDF here, or click to select a file.</p>
+                </div>
+
+                <a id="download-link">Save PDF with Line Numbers</a>
+            </div>
+            <div class="limitations-container">
+                <h3>Technical Limitations</h3>
+                <p>
+                    This tool relies on extracting text data from the PDF file. Therefore, it has the following
+                    limitations:
+                </p>
+                <ul>
+                    <li>It only works with PDFs that contain selectable text. It will not work on scanned documents or
+                        PDFs that consist only of images.</li>
+                    <li>The accuracy of line numbering depends on the structure of the PDF. Complex layouts with
+                        multiple columns or tables might not be numbered correctly.</li>
+                    <li>Very large PDF files may cause performance issues in the browser.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="right-column">
+            <div id="spinner-container" style="display: none;">
+                <div class="spinner"></div>
+            </div>
+            <iframe id="pdf-viewer" style="width: 100%; height: 100%; border: 1px solid #ccc; display: none;"></iframe>
+        </div>
+    </div>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"
+        integrity="sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI"
+        crossorigin="anonymous"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
