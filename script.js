@@ -4,23 +4,40 @@ const spinner = document.getElementById('spinner-container');
 const viewer = document.getElementById('pdf-viewer');
 const downloadLink = document.getElementById('download-link');
 
+let currentFile = null;
+
 // Algorithm to detect lines on a page
-const generateLinesForPage = async (page) => {
+const generateLinesForPage = async (page, columnFilter = 'all') => {
     const textContent = await page.getTextContent();
     if (textContent.items.length === 0) {
         return []; // Return empty array for empty pages
     }
 
-    // Initial filter to remove rotated text items (e.g., 90 degrees)
-    const horizontalItems = textContent.items.filter(item => {
+    const pageWidth = page.getViewport({ scale: 1.0 }).width;
+
+    // Initial filter to remove rotated text items and filter by column
+    const originalItems = textContent.items.filter(item => {
         const transform = item.transform;
-        // For a standard horizontal text, transform[1] and transform[2] are close to 0.
-        // We check if the text is NOT rotated.
         const isHorizontal = Math.abs(transform[1]) < 0.01 && Math.abs(transform[2]) < 0.01;
-        return isHorizontal;
+        if (!isHorizontal) return false;
+
+        const x = item.transform[4];
+        const width = item.width;
+        const midpoint = pageWidth / 2;
+
+        if (columnFilter === 'left') {
+            return x < midpoint;
+        }
+        if (columnFilter === 'right') {
+            return x + width > midpoint;
+        }
+        return true; // 'all'
     });
 
-    const originalItems = horizontalItems;
+    if (originalItems.length === 0) {
+        return [];
+    }
+
     const itemsToIgnore = new Set();
 
     // 1. Pre-filtering stage to identify and ignore "noise" items
@@ -50,6 +67,10 @@ const generateLinesForPage = async (page) => {
 
     const filteredItems = originalItems.filter((_, index) => !itemsToIgnore.has(index));
 
+    if (filteredItems.length === 0) {
+        return [];
+    }
+    
     // 2. Build adjacency list on the filtered items
     const adj = new Array(filteredItems.length).fill(0).map(() => []);
     for (let i = 0; i < filteredItems.length; i++) {
@@ -111,6 +132,7 @@ const handleFile = async (file) => {
         alert('Please select a valid PDF file.');
         return;
     }
+    currentFile = file;
 
     // Show spinner and hide viewer/download link
     spinner.style.display = 'flex';
@@ -126,42 +148,59 @@ const handleFile = async (file) => {
         const pages = pdfDoc.getPages();
 
         const pdfjsDoc = await pdfjsLib.getDocument({ data: new Uint8Array(existingPdfBytes) }).promise;
+        const isTwoColumn = document.getElementById('two-column-toggle').checked;
 
         for (let i = 0; i < pdfjsDoc.numPages; i++) {
             const page = await pdfjsDoc.getPage(i + 1);
-            const lines = await generateLinesForPage(page);
-            
             const pdfPage = pages[i];
-            let lineCount = 1;
+            const { width: pageWidth } = pdfPage.getSize();
+            
+            const drawLines = (lines, options = {}) => {
+                const { lineStartCount = 1, side = 'left' } = options;
+                let lineCount = lineStartCount;
 
-            for (const lineItems of lines) {
-                const lineText = lineItems.map(item => item.str).join('');
-                if (lineText.trim() === '') continue;
+                for (const lineItems of lines) {
+                    const lineText = lineItems.map(item => item.str).join('');
+                    if (lineText.trim() === '') continue;
 
-                // Calculate total width for weighting
-                const totalWidth = lineItems.reduce((sum, item) => sum + item.width, 0);
-                
-                // Sort items by y-coordinate to find the median
-                lineItems.sort((a, b) => b.transform[5] - a.transform[5]);
+                    // Calculate total width for weighting
+                    const totalWidth = lineItems.reduce((sum, item) => sum + item.width, 0);
+                    
+                    // Sort items by y-coordinate to find the median
+                    lineItems.sort((a, b) => b.transform[5] - a.transform[5]);
 
-                let accumulatedWidth = 0;
-                let weightedMedianY = lineItems[0].transform[5]; // Default to the highest item
+                    let accumulatedWidth = 0;
+                    let weightedMedianY = lineItems.length > 0 ? lineItems[0].transform[5] : 0; // Default to the highest item
 
-                for (const item of lineItems) {
-                    accumulatedWidth += item.width;
-                    if (accumulatedWidth >= totalWidth / 2) {
-                        weightedMedianY = item.transform[5];
-                        break;
+                    for (const item of lineItems) {
+                        accumulatedWidth += item.width;
+                        if (accumulatedWidth >= totalWidth / 2) {
+                            weightedMedianY = item.transform[5];
+                            break;
+                        }
                     }
-                }
 
-                pdfPage.drawText(`${lineCount++}`, {
-                    x: 5,
-                    y: weightedMedianY,
-                    font: helveticaFont,
-                    size: 8,
-                    color: rgb(0.5, 0.5, 0.5),
-                });
+                    const x = side === 'left' ? 5 : pageWidth - 20;
+
+                    pdfPage.drawText(`${lineCount++}`, {
+                        x: x,
+                        y: weightedMedianY,
+                        font: helveticaFont,
+                        size: 8,
+                        color: rgb(0.5, 0.5, 0.5),
+                    });
+                }
+                return lineCount;
+            }
+
+            if (isTwoColumn) {
+                const leftLines = await generateLinesForPage(page, 'left');
+                const rightLines = await generateLinesForPage(page, 'right');
+                const leftLineCount = drawLines(leftLines, { lineStartCount: 1, side: 'left' });
+                drawLines(rightLines, { lineStartCount: leftLineCount, side: 'right' });
+            } else {
+                const lines = await generateLinesForPage(page, 'all');
+                drawLines(lines, { lineStartCount: 1, side: 'left' });
             }
         }
 
@@ -183,21 +222,12 @@ const handleFile = async (file) => {
     }
 };
 
-// Event listener for the hidden file input
-fileInput.addEventListener('change', (event) => {
-    if (event.target.files.length > 0) {
-        handleFile(event.target.files[0]);
-    }
-});
+// Event Listeners
+const twoColumnToggle = document.getElementById('two-column-toggle');
 
-// Make the drop zone clickable
-dropZone.addEventListener('click', () => {
-    fileInput.click();
-});
-
-// Drag and drop event listeners
+// Drag and drop
 dropZone.addEventListener('dragover', (event) => {
-    event.preventDefault(); // Necessary to allow drop
+    event.preventDefault();
     dropZone.classList.add('dragover');
 });
 
@@ -208,9 +238,26 @@ dropZone.addEventListener('dragleave', () => {
 dropZone.addEventListener('drop', (event) => {
     event.preventDefault();
     dropZone.classList.remove('dragover');
-    
     if (event.dataTransfer.files.length > 0) {
         handleFile(event.dataTransfer.files[0]);
+    }
+});
+
+// Click to select
+dropZone.addEventListener('click', () => {
+    fileInput.click();
+});
+
+fileInput.addEventListener('change', (event) => {
+    if (event.target.files.length > 0) {
+        handleFile(event.target.files[0]);
+    }
+});
+
+// Re-process on toggle
+twoColumnToggle.addEventListener('change', () => {
+    if (currentFile) {
+        handleFile(currentFile);
     }
 });
 
