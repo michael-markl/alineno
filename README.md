@@ -34,7 +34,7 @@ If you use LaTeX, please use this LaTeX package for professional line numbers.
 
 ## 🚀 How to Use
 
-Just open [michael-markl.github.io/alineno](https://github.michael-markl.de/alineno).
+Just open [michael-markl.github.io/alineno](https://michael-markl.github.io/alineno).
 
 ## ✈️ Offline Usage
 
