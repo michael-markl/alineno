@@ -197,7 +197,9 @@ const handleFile = async (file) => {
                 const leftLines = await generateLinesForPage(page, 'left');
                 const rightLines = await generateLinesForPage(page, 'right');
                 const leftLineCount = drawLines(leftLines, { lineStartCount: 1, side: 'left' });
-                drawLines(rightLines, { lineStartCount: leftLineCount, side: 'right' });
+                const resetCounter = document.getElementById('reset-counter-toggle').checked;
+                const rightLineStartCount = resetCounter ? 1 : leftLineCount;
+                drawLines(rightLines, { lineStartCount: rightLineStartCount, side: 'right' });
             } else {
                 const lines = await generateLinesForPage(page, 'all');
                 drawLines(lines, { lineStartCount: 1, side: 'left' });
@@ -224,6 +226,8 @@ const handleFile = async (file) => {
 
 // Event Listeners
 const twoColumnToggle = document.getElementById('two-column-toggle');
+const resetCounterContainer = document.getElementById('reset-counter-container');
+const resetCounterToggle = document.getElementById('reset-counter-toggle');
 
 // Drag and drop
 dropZone.addEventListener('dragover', (event) => {
@@ -256,8 +260,15 @@ fileInput.addEventListener('change', (event) => {
 
 // Re-process on toggle
 twoColumnToggle.addEventListener('change', () => {
+    resetCounterContainer.style.display = twoColumnToggle.checked ? '' : 'none';
+    
     if (currentFile) {
         handleFile(currentFile);
     }
 });
 
+resetCounterToggle.addEventListener('change', () => {
+    if (currentFile) {
+        handleFile(currentFile);
+    }
+});

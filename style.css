@@ -165,12 +165,20 @@ input[type="file"] {
 }
 
 @media (max-width: 768px) {
+    html, body, .main-layout {
+        height: auto;
+    }
+
     .main-layout {
         flex-direction: column;
     }
 
     .left-column {
         width: 100%;
+    }
+
+    .right-column {
+        height: 100svh;
     }
 }
 
