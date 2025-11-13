@@ -14,10 +14,13 @@
 
 ---
 
-Alineno is a free, open-source, client-side tool for adding line numbers to PDF files. It detects lines even if your document contains math formulas, footnotes, superscripts, etc.
+Alineno is a free, open-source, client-side tool for adding line numbers to PDFs. It detects lines even if your document contains math formulas, footnotes, superscripts, etc.
 Your files are never uploaded to a server, ensuring 100% privacy and security.
 
-This project was built to solve a common problem for students, researchers, and legal professionals who need to reference specific lines in a PDF document.
+This project was built to solve a common problem for students, researchers, and other professionals who need to reference specific lines in a PDF document.
+
+The name "Alineno" is an homage to the LaTeX package [lineno](https://ctan.org/pkg/lineno).
+If you use LaTeX, please use this LaTeX package for professional line numbers.
 
 ## ✨ Features
 
