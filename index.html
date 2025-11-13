@@ -7,10 +7,13 @@
     <title>Alineno: Add Perfectly Aligned Line Numbers to PDFs in Your Browser</title>
 
     <!-- SEO and Social Sharing -->
-    <meta name="description" content="Alineno is a free, open-source tool to add perfectly aligned line numbers to your PDF file. Everything happens locally in your browser for maximum privacy and speed. No upload required.">
-    <meta name="keywords" content="pdf line numbers, add line numbers to pdf, pdf tool, developer tool, legal document, academic paper, pdf annotation, browser tool, client-side, no-upload">
+    <meta name="description"
+        content="Alineno is a free, open-source tool to add perfectly aligned line numbers to your PDF file. Everything happens locally in your browser for maximum privacy and speed. No upload required.">
+    <meta name="keywords"
+        content="pdf line numbers, add line numbers to pdf, pdf tool, developer tool, legal document, academic paper, pdf annotation, browser tool, client-side, no-upload">
     <meta property="og:title" content="Alineno: Add Perfectly Aligned Line Numbers to PDFs in Your Browser">
-    <meta property="og:description" content="A free, client-side tool for adding perfectly aligned line numbers to legal documents, academic papers, and other PDFs without ever uploading your files.">
+    <meta property="og:description"
+        content="A free, client-side tool for adding perfectly aligned line numbers to legal documents, academic papers, and other PDFs without ever uploading your files.">
     <meta property="og:type" content="website">
     <!-- <meta property="og:image" content="your-preview-image.png"> -->
 
@@ -20,28 +23,14 @@
         integrity="sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e"
         crossorigin="anonymous"></script>
     <script>
-        // Set the worker source for pdf.js securely with SRI hash
-        (async () => {
-            try {
-                const workerSrcUrl = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
-                const integrity = 'sha384-SnzOobpRMLXZ52iJvZm/C0fYw0OQemTXzTjIsdsfMcrCtCEe9qgzxTd3RSklO5x2';
-
-                const response = await fetch(workerSrcUrl, { integrity });
-
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch worker script: ${response.statusText}`);
-                }
-
-                const scriptBlob = await response.blob();
-                const objectUrl = URL.createObjectURL(scriptBlob);
-                pdfjsLib.GlobalWorkerOptions.workerSrc = objectUrl;
-                console.log('pdf.js worker set up successfully via Blob URL.');
-            } catch (error) {
-                console.error('Failed to set up pdf.js worker:', error);
-                // Optionally, provide feedback to the user that the PDF functionality might not work.
-            }
-        })();
+        // Set the worker source for pdf.js. Since, we cannot verify the integrity of the worker script when loading from CDN, we use a local copy.
+        // Note, that the file matches exactly https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = './pdf.worker.min.js';
     </script>
+    <!-- I'll also embed the script here, so your browser automatically verifies the integrity. -->
+    <script src="./pdf.worker.min.js"
+        integrity="sha384-SnzOobpRMLXZ52iJvZm/C0fYw0OQemTXzTjIsdsfMcrCtCEe9qgzxTd3RSklO5x2"
+        crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -52,7 +41,7 @@
                 <h1>Alineno</h1>
                 <p>Add perfectly aligned line numbers to your PDF.</p>
                 <p>All processing happens locally in your browser. <strong>No upload takes place.</strong></p>
-                
+
                 <div id="drop-zone">
                     <input type="file" id="pdf-input" accept="application/pdf" style="display: none;">
                     <p>Drag & Drop a PDF here, or click to select a file.</p>

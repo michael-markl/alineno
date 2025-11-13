@@ -213,7 +213,7 @@ const handleFile = async (file) => {
         viewer.src = url;
         viewer.style.display = 'block';
         downloadLink.href = url;
-        downloadLink.download = 'line-numbered.pdf';
+        downloadLink.download = currentFile.name;
         downloadLink.style.display = 'block';
 
     } catch (error) {
