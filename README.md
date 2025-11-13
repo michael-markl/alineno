@@ -7,7 +7,7 @@
 <p align="center">
   <strong>Add Perfectly Aligned Line Numbers to PDFs</strong>
   <br /><br />
-  <a href="https://michael-markl.github.com/alineno">Open App</a>
+  <a href="https://michael-markl.github.io/alineno">Open App</a>
   <br /><br />
   <a href="https://github.com/michael-markl/alineno/issues">Report Bug</a>
   ·
