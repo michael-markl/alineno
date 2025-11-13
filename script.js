@@ -70,7 +70,7 @@ const generateLinesForPage = async (page, columnFilter = 'all') => {
     if (filteredItems.length === 0) {
         return [];
     }
-    
+
     // 2. Build adjacency list on the filtered items
     const adj = new Array(filteredItems.length).fill(0).map(() => []);
     for (let i = 0; i < filteredItems.length; i++) {
@@ -97,9 +97,9 @@ const generateLinesForPage = async (page, columnFilter = 'all') => {
             const componentItems = [];
             const queue = [i];
             visited[i] = true;
-            
+
             let head = 0;
-            while(head < queue.length) {
+            while (head < queue.length) {
                 const u = queue[head++];
                 componentItems.push(filteredItems[u]);
 
@@ -149,23 +149,28 @@ const handleFile = async (file) => {
 
         const pdfjsDoc = await pdfjsLib.getDocument({ data: new Uint8Array(existingPdfBytes) }).promise;
         const isTwoColumn = document.getElementById('two-column-toggle').checked;
+        const margin = parseInt(document.getElementById('margin-input').value, 10) || 20;
 
         for (let i = 0; i < pdfjsDoc.numPages; i++) {
             const page = await pdfjsDoc.getPage(i + 1);
             const pdfPage = pages[i];
             const { width: pageWidth } = pdfPage.getSize();
-            
+
             const drawLines = (lines, options = {}) => {
                 const { lineStartCount = 1, side = 'left' } = options;
+                const nonEmptyLines = lines.filter(item => {
+                    const lineText = item.map(subItem => subItem.str).join('');
+                    return lineText.trim() !== '';
+                })
+                maxLineNumber = lineStartCount + nonEmptyLines.length - 1;
+                const numDigits = Math.floor(Math.log10(maxLineNumber)) + 1;
+
                 let lineCount = lineStartCount;
 
-                for (const lineItems of lines) {
-                    const lineText = lineItems.map(item => item.str).join('');
-                    if (lineText.trim() === '') continue;
-
+                for (const lineItems of nonEmptyLines) {
                     // Calculate total width for weighting
                     const totalWidth = lineItems.reduce((sum, item) => sum + item.width, 0);
-                    
+
                     // Sort items by y-coordinate to find the median
                     lineItems.sort((a, b) => b.transform[5] - a.transform[5]);
 
@@ -180,9 +185,11 @@ const handleFile = async (file) => {
                         }
                     }
 
-                    const x = side === 'left' ? 5 : pageWidth - 20;
+                    const lineNumberText = `${lineCount++}`;
+                    const textWidth = helveticaFont.widthOfTextAtSize(lineNumberText, 8);
 
-                    pdfPage.drawText(`${lineCount++}`, {
+                    const x = (side === 'left') ? margin : pageWidth - margin - textWidth;
+                    pdfPage.drawText(lineNumberText, {
                         x: x,
                         y: weightedMedianY,
                         font: helveticaFont,
@@ -209,7 +216,7 @@ const handleFile = async (file) => {
         const pdfBytes = await pdfDoc.save();
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
-        
+
         viewer.src = url;
         viewer.style.display = 'block';
         downloadLink.href = url;
@@ -224,10 +231,12 @@ const handleFile = async (file) => {
     }
 };
 
-// Event Listeners
 const twoColumnToggle = document.getElementById('two-column-toggle');
 const resetCounterContainer = document.getElementById('reset-counter-container');
 const resetCounterToggle = document.getElementById('reset-counter-toggle');
+const marginInput = document.getElementById('margin-input');
+
+// Event Listeners
 
 // Drag and drop
 dropZone.addEventListener('dragover', (event) => {
@@ -259,9 +268,14 @@ fileInput.addEventListener('change', (event) => {
 });
 
 // Re-process on toggle
+marginInput.addEventListener('change', () => {
+    if (currentFile) {
+        handleFile(currentFile);
+    }
+});
 twoColumnToggle.addEventListener('change', () => {
     resetCounterContainer.style.display = twoColumnToggle.checked ? '' : 'none';
-    
+
     if (currentFile) {
         handleFile(currentFile);
     }

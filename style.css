@@ -146,6 +146,15 @@ input[type="file"] {
     text-align: center;
 }
 
+#margin-input {
+    width: 60px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-left: auto;
+}
+
 #download-link:hover {
     background-color: #0056b3;
 }
