@@ -1,0 +1,36 @@
+{
+  "name": "alineno",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Add line numbers to PDFs",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "fdf": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michael-markl/alineno.git"
+  },
+  "keywords": [
+    "pdf",
+    "line-numbers",
+    "lineno",
+    "pdfjs",
+    "pdf-lib"
+  ],
+  "author": "Michael Markl",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/michael-markl/alineno/issues"
+  },
+  "homepage": "https://github.com/michael-markl/alineno",
+  "dependencies": {
+    "pdfjs-dist": "^5.4.394",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "prettier": "^3.6.2"
+  }
+}
