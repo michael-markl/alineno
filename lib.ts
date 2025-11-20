@@ -69,26 +69,37 @@ function doYIntervalsIntersect(itemA: TextItem, itemB: TextItem): boolean {
 }
 
 function filterNoiseItems(items: TextItem[]): TextItem[] {
-  const itemsToIgnore = new Set<number>();
-  for (let i = 0; i < items.length; i++) {
-    const itemA = items[i]!;
-    for (let j = i + 1; j < items.length; j++) {
-      const itemB = items[j]!;
+  const itemsToIgnoreWithMaxWidth = new Map<number, number>();
 
-      // If y-intervals intersect and one is much wider than the other, mark the narrow one to be ignored.
-      if (doYIntervalsIntersect(itemA, itemB)) {
-        const widthRatio = itemA.width / itemB.width;
-        if (widthRatio > 10) {
-          // itemA is much wider than itemB
-          itemsToIgnore.add(j);
-        } else if (widthRatio < 0.1) {
-          // itemB is much wider than itemA
-          itemsToIgnore.add(i);
+  for (let iteration = 0; iteration < 10; iteration++) {
+    let stationary = true;
+    for (let i = 0; i < items.length; i++) {
+      const itemA = items[i]!;
+      for (let j = i + 1; j < items.length; j++) {
+        const itemB = items[j]!;
+
+        // If y-intervals intersect and one is much wider than the other, mark the narrow one to be ignored.
+        if (doYIntervalsIntersect(itemA, itemB)) {
+          let maxWidthA = itemsToIgnoreWithMaxWidth.get(i) ?? itemA.width;
+          let maxWidthB = itemsToIgnoreWithMaxWidth.get(j) ?? itemB.width;
+
+          if (itemA.width < 0.1 * maxWidthB) {
+            stationary = false;
+            itemsToIgnoreWithMaxWidth.set(i, Math.max(maxWidthB, maxWidthA));
+          }
+          if (itemB.width < 0.1 * maxWidthA) {
+            stationary = false;
+            itemsToIgnoreWithMaxWidth.set(j, Math.max(maxWidthA, maxWidthB));
+          }
         }
       }
     }
+    if (stationary) {
+      break;
+    }
   }
-  return items.filter((_, index) => !itemsToIgnore.has(index));
+
+  return items.filter((_, index) => !itemsToIgnoreWithMaxWidth.has(index));
 }
 
 function groupItemsIntoLines(
