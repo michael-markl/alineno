@@ -5,8 +5,8 @@
   "description": "Add line numbers to PDFs",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "fdf": "echo \"Error: no test specified\" && exit 1"
+    "build": "vite build",
+    "test": "tsc"
   },
   "repository": {
     "type": "git",
@@ -26,11 +26,13 @@
   },
   "homepage": "https://github.com/michael-markl/alineno",
   "dependencies": {
-    "pdfjs-dist": "^5.4.394",
-    "pdf-lib": "^1.17.1"
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^5.4.394"
   },
   "devDependencies": {
+    "prettier": "^3.6.2",
     "typescript": "^5.9.3",
-    "prettier": "^3.6.2"
+    "vite": "^7.2.4",
+    "vite-plugin-static-copy": "^3.1.4"
   }
 }

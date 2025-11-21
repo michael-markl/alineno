@@ -26,18 +26,19 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alineno
+          path: dist
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Prepare artifact
-        run: |
-          mkdir archive
-          cp index.html logo.svg lib.js script.js pdf.worker.min.js style.css archive
-
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: archive
+          path: dist
 
       - name: Deploy to GitHub Pages
         id: deployment

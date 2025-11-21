@@ -1,4 +1,8 @@
 import { getLines, lineMedianY } from "./lib.js";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
+
+GlobalWorkerOptions.workerSrc = "./pdf.worker.min.mjs";
 
 const dropZone = document.getElementById("drop-zone");
 const fileInput = document.getElementById("pdf-input");
@@ -35,13 +39,11 @@ const handleFile = async (file) => {
     }
     const payload = currentFile.payload;
 
-    const { PDFDocument, rgb, StandardFonts } = PDFLib;
-
     const pdfDoc = await PDFDocument.load(payload);
     const font = await pdfDoc.embedFont(StandardFonts.Courier);
     const pages = pdfDoc.getPages();
 
-    const pdfjsDoc = await pdfjsLib.getDocument({
+    const pdfjsDoc = await getDocument({
       data: new Uint8Array(payload),
     }).promise;
     const isTwoColumn = document.getElementById("two-column-toggle").checked;

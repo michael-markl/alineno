@@ -29,22 +29,6 @@
 
     <link rel="icon" href="logo.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="style.css" />
-    <script
-      src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"
-      integrity="sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e"
-      crossorigin="anonymous"
-    ></script>
-    <script>
-      // Set the worker source for pdf.js. Since, we cannot verify the integrity of the worker script when loading from CDN, we use a local copy.
-      // Note, that the file matches exactly https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js
-      pdfjsLib.GlobalWorkerOptions.workerSrc = "./pdf.worker.min.js";
-    </script>
-    <!-- I'll also embed the script here, so your browser automatically verifies the integrity. -->
-    <script
-      src="./pdf.worker.min.js"
-      integrity="sha384-SnzOobpRMLXZ52iJvZm/C0fYw0OQemTXzTjIsdsfMcrCtCEe9qgzxTd3RSklO5x2"
-      crossorigin="anonymous"
-    ></script>
   </head>
 
   <body>
@@ -177,11 +161,6 @@
         ></path>
       </svg>
     </a>
-    <script
-      src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"
-      integrity="sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI"
-      crossorigin="anonymous"
-    ></script>
-    <script src="script.js" type="module"></script>
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>
