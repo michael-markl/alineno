@@ -2,7 +2,11 @@ import { getLines, lineMedianY } from "./lib.js";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 
-GlobalWorkerOptions.workerSrc = "./pdf.worker.min.mjs";
+if (location.protocol !== "file:") {
+  GlobalWorkerOptions.workerSrc = "./assets/pdf.worker.min.mjs";
+} else {
+  GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@5.4.394/build/pdf.worker.min.mjs";
+}
 
 const dropZone = document.getElementById("drop-zone");
 const fileInput = document.getElementById("pdf-input");
